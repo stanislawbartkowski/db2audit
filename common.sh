@@ -31,5 +31,6 @@ rundb2() {
    eval db2 $X "\"$command\"" >$TMPFILE
    local -r RES=$?
    logfile $TMPFILE 
-   [ $RES -eq 0 ] || logfatal "Execution failed. db2 exit code $RES"
+   [ $RES -ne 0 ] && log "$RES db2 exit code non-zero. Will continue if not fatal"
+   [ $RES -le 4 ] || logfatal "Execution failed. db2 exit code $RES"
 }

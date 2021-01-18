@@ -229,7 +229,14 @@ Security audit for *sample* database will run *config/quueries/unauthconnect.rc*
 AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
 ```
 
+> db2 connect to sample<br>
 
+Make *user* read/wite user.<br>
+> db2 grant DATAACCESS on database  to user user<br>
+
+Make *vuser* read only user.<br>
+> db2 grant EXECUTE on package NULLID.SQLC2P30 to user vuser<br>
+> db2 -x list tables | cut -d ' ' -f 1 | while read t; do echo "GRANT SELECT ON $t to user vuser; "; done | db2 -tv<br>
 
 ## Test1, nuser is trying to connect to sample
 

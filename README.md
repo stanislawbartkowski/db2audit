@@ -79,4 +79,4 @@ Loading audit data into audit database involves three steps:<br>
 
 After loading data into *dbaudit* database, the */home/db2inst1/archaudit* is not cleared and keeps the results of all previous *AUDIT_ARCHIVE* calls. To avoid data duplication, a seperate text file *$LOGDIR/alreadyfile.txt* keeps the list of archived file already loaded. After every successfull data loading, a new line is added to this file.<br>
 
-
+https://github.com/stanislawbartkowski/db2audit/blob/main/load.sh

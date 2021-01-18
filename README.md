@@ -200,3 +200,9 @@ QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE
 
 The query detects all *-551* incidents meaning that the user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
 
+# Test
+
+Assume database *SAMPLE* and the following security policy:<br>
+* *user* can read and write tables
+* *vuser* read only user
+* *nuser* any access forbidded

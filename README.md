@@ -195,7 +195,7 @@ Example:
 ```
 HEADER="Not authorized command on database $DATABASE detected"
 
-QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE,AUTHID,HOSTNAME,APPID,APPNAME, INSTNAME FROM CHECKING WHERE STATUS=-551 AND TIMESTAMP>'$CHEKING_MAXTM'"
+QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE,AUTHID,HOSTNAME,APPID,APPNAME, INSTNAME FROM CHECKING WHERE STATUS=-551 AND TIMESTAMP>'$CHECKING_MAXTM'"
 ```
 
 The query detects all *-551* incidents meaning that the user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
@@ -231,7 +231,7 @@ AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
 ```
 In a similar way, *UNAUTHUPDATE* is used in *config/queries/unauthupdate.rc* WHERE clause. This query detects any update sql statement: UPDATE, INSERT, DELETE executed by unautorized users.<br>
 ```
-QUERY="SELECT ... FROM EXECUTE WHERE .. AND AUTHID NOT IN ('DB2INST1'${UNAUTHUPDATE}) AND ACTIVITYTYPE='WRITE_DML' ... "
+QUERY="SELECT ... FROM EXECUTE WHERE .. AND AUTHID IN ('DB2INST1'${UNAUTHUPDATE}) AND ACTIVITYTYPE='WRITE_DML' ... "
 ```
 
 > db2 connect to sample<br>

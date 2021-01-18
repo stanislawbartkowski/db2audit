@@ -232,3 +232,21 @@ AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
 
 
 ## Test1, nuser is trying to connect to sample
+
+Log in as *user* (authorized) and *nuser* (not authorized).
+
+> db2 connect to sample user user using secret<br>
+> db2 connect to sample user user using secret<br>
+
+On the server side.<br>
+
+> ./load.sh<br>
+> ./audit.sh<br>
+
+> cat /tmp/alert.txt<br>
+```
+LERT: Unauthorized connect to database sample detected
+2021-01-18 18:31:45                                                                                                                                               SAMPLE   NUSER  db1.sb.com 192.168.0.242.57628.210118173145 db2bp  db2inst1                   
+```
+
+Only *nuser* is reported and security incident.

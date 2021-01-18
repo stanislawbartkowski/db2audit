@@ -202,7 +202,11 @@ The query detects all *-551* incidents meaning that the user does not have privi
 
 # Test
 
+## Security
+
 Assume database *SAMPLE* and the following security policy:<br>
-* *user* can read and write tables
-* *vuser* read only user
-* *nuser* any access forbidded
+* *user* : can read and write tables
+* *vuser* : read only user
+* *nuser* : any access forbidden
+
+## Test1, nuser is trying to connect to sample

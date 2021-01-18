@@ -8,8 +8,8 @@ DB2 auditing by itself is a tool to collect audit data only. Next step is to dev
 
 * Collect audit data and make them ready for further analysis.
 * Configurable method to signal security violations.
-* Flexible security rules, easy to define and expand according to particular use case.
-* More then one database in a single instance, different set of rules for every database.
+* Flexible security rules, easy to define and expand according to a particular use case.
+* More then one database in a single instance, a different set of rules for every database.
 
 # Installation
 
@@ -27,14 +27,14 @@ DB2 auditing by itself is a tool to collect audit data only. Next step is to dev
 | Variable name | Description | Sample value
 | ---- | ----- | ----- |
 | AUDITDATABASE | The name of the audit database | db2uadit
-| AUDITUSER | The audit user having *SECADM* authority in database being monitored | 
+| AUDITUSER | The audit user having *SECADM* authority in the database being monitored | 
 | LOGFILE | The log file created by the tool | $LOGDIR/histfile.log
 | DELIMDIR | Temporary directory used to extract CVS text files | DELIMDIR=/tmp/dir
-| ALREADYFILE | Text file containing the list of already load audit file | $LOGDIR/alreadyfile.txt
+| ALREADYFILE | Text file containing the list of already loaded audit file | $LOGDIR/alreadyfile.txt
 | MAXTIMESTAMPFILE | Text file containing the last timestamp for every audit table | $LOGDIR/maxtimestampfile.txt
 | DATABASES | List of monitored databases separated by space | "sample mdm"
 
-*config/queris*
+*config/queries*
 List of investigative queries. Every query is stored in a separate *rc* file. More detailed description: look below
 
 *config/db_{database}.rc
@@ -47,8 +47,8 @@ Every security incident is reported by calling *alert.sh* script. The script is 
 
 | Parameter | Description |
 | ---- | ---- |
-| $1 | Value of *HEADER* environment variable corresponding to the investifative query. Allows to make more descriptive message 
-| $2 | The name of temporary file containg the not empty query result
+| $1 | Value of *HEADER* environment variable corresponding to the investigative query. Allows to make more a descriptive error message 
+| $2 | The name of temporary file containing a not empty query result
 
 Example, stores alerts in the designed text file.
 
@@ -71,7 +71,7 @@ The tool contains two main script file.<br>
 * *load.sh* Extracts and loads audit recored in *dbaudit* database
 * *audit.sh* Runs investigative queries to detect security incidents
 
-The scripts should executed on the host where DB2 instance is installed as *audituser*. It is using local connection to databases. <br>
+The scripts should be executed on the host where DB2 instance is installed as *audituser*. It is using a local connection to databases.<br>
 
 # Prerequisities
 
@@ -81,7 +81,7 @@ Create a separate database to keep audit data, *dbaudit*.<br>
 
 > db2 create database dbaudit<br>
 
-Create a separate user to manage audit activities, *audituser*. Make *audituser* the administrator of *dbaudit* database and assign *SECADM* authority in the database under surveillance. Authority *SECADM* allows the user to run audit related activity but does not give access to the data.
+Create a separate user to manage audit activities, *audituser*. Make *audituser* the administrator of *dbaudit* database and assign *SECADM* authority in the database under surveillance. Authority *SECADM* allows the user to run audit-related activity but does not give access to the data.
 
 > db2 grant DBADM on database dbaudit to user audituser<br>
 > db2 grant SECADM on database /database/ to user audituser<br>
@@ -114,7 +114,7 @@ Current audit data records are stored in */home/db2inst1/audit*. After running *
 
 ## Enable audit policy
 
-Next step is to enable auditing in DB2 datababase and decide which audit events are going to be collected. Collecting too much data will cause audit database growing very fast and beging filled with unused data, being scanty here brings the risk that some security violations will pass unnoticed. The audit rules defined in the solution assumes that related data are collected. The rules will not signal security breaches if there is no approproate data. <br>
+Next step is to enable auditing in DB2 database and decide which audit events are going to be collected. Collecting too much data will cause the audit database growing very fast and being filled with unused data, being scanty here brings the risk that some security violations will pass unnoticed. The audit rules defined in the solution assumes that related data are collected. The rules will not signal security breaches if there is no appropriate data. <br>
 
 Assume all data is collected.<br>
 
@@ -130,12 +130,12 @@ https://github.com/stanislawbartkowski/db2audit/blob/main/load.sh
 
 *load.sh* scripts reads the list of all databases in *DATABASES* environment variable and for every database move audit data records info *dbaudit* database.<br>
 <br>
-Loading audit data into audit database involves three steps:<br>
+Loading audit data into the audit database involves three steps:<br>
 * Run *AUDIT_ARCHIVE* command to move audit records to */home/db2inst1/archaudit* and reset */home/db2inst1/audit*
-* Run *SYSPROC.AUDIT_DELIM_EXTRACT* command to trasform archived data to CSV text files
+* Run *SYSPROC.AUDIT_DELIM_EXTRACT* command to transform archived data to CSV text files
 * Load extracted CSV files into *dbaudit* database
 
-After loading data into *dbaudit* database, the */home/db2inst1/archaudit* is not cleared and stores the results of all previous *AUDIT_ARCHIVE* calls. To avoid data duplication, a seperate text file *$LOGDIR/alreadyfile.txt* keeps the list of archived file already loaded. After every successfull data loading, a new line is added to this file.<br>
+After loading data into *dbaudit* database, the */home/db2inst1/archaudit* is not cleared and stores the results of all previous *AUDIT_ARCHIVE* calls. To avoid data duplication, a separate text file *$LOGDIR/alreadyfile.txt* keeps the list of the archived file already loaded. After every successful data loading, a new line is added to this file.<br>
 
 The script *load.sh* can be launched manually or be executed as a crontab job in some time intervals.<br>
 
@@ -147,20 +147,20 @@ https://github.com/stanislawbartkowski/db2audit/blob/main/audit.sh
 
 >./audit.sh<br>
 
-The script can be launched manually on demand or be executed as a crobjob tab.<br>
+The script can be launched manually on-demand or be executed as a crobjob tab.<br>
 <br>
 The *audit.sh* script is performing the following steps:<br>
 
 * Read all databases in *DATABASES* environment variable.
 * For every database, source *config/db_{database}.rc* file
 * *rc* file should contain at least *QUERIES* environment variable. The variable specifies the list of investigative queries to be executed.
-* For every audit table, an environment variable is set equals to the timestamp of the last auditing to avoid duplication of alers.
+* For every audit table, an environment variable is set equals to the timestamp of the last auditing to avoid duplication of alerts.
 * Runs every investigative query specified in *QUERIES*. If the query returns not empty result, the *alert.sh* script is called.
 * After scanning all databases, *MAXTIMESTAMPFILE* file is updated.
 
 ## MAXTIMESTAMPFILE
 
-The *dbaudit* databases is storing all audit records. To avoid alert duplication, the tool is maintaining *MAXTIMESTAMPFILE* (specfied in *config/env.rc*). It is the text file and every line consist the name of the audit table and the timestamp of the last scan. Example:
+The *dbaudit* databases is storing all audit records. To avoid alert duplication, the tool is maintaining *MAXTIMESTAMPFILE* (specified in *config/env.rc*). It is the text file and every line consists the name of the audit table and the timestamp of the last scan. Example:
 ```
 ```
 CHECKING_MAXTM
@@ -184,8 +184,8 @@ unauthop.rc
 ```
 
 Every query is stored as a separate *rc* bash file. The file defines two environment variables:
-* HEADER : The header text included in the alert message making the report more human readable.
-* QUERY: The text of the query. It bash enviroment variable and can be customized by another environment variable specific to database.
+* HEADER : The header text included in the alert message making the report more human-readable.
+* QUERY: The text of the query. It is bash environment variable and can be customized by another environment variable specific to the database.
 
 Example:
 ```
@@ -194,5 +194,5 @@ HEADER="Not authorized command on database $DATABASE detected"
 QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE,AUTHID,HOSTNAME,APPID,APPNAME, INSTNAME FROM CHECKING WHERE STATUS=-551 AND TIMESTAMP>'$CHEKING_MAXTM'"
 ```
 
-The query detects all *-551* incidents meaning that user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
+The query detects all *-551* incidents meaning that the user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
 

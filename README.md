@@ -257,3 +257,39 @@ LERT: Unauthorized connect to database sample detected
 ```
 
 Only *nuser* is reported and security incident.
+
+# Test2, vuser tries to update data
+
+> db2 connect to sample user vuser
+> db2 "select * from db2inst1.staff"
+```
+.........
+ 310 Graham        66 Sales     13  71000,00    200,30
+   320 Gonzales      66 Sales      4  76858,20    844,00
+   330 Burke         66 Clerk      1  49988,00     55,50
+   340 Edwards       84 Sales      7  67844,00   1285,00
+   350 Gafney        84 Clerk      5  43030,50    188,00
+
+  35 record(s) selected.
+```
+
+> db2 "delete from db2inst1.staff where DEPT=999"
+```
+DB21034E  The command was processed as an SQL statement because it was not a 
+valid Command Line Processor command.  During SQL processing it returned:
+SQL0551N  The statement failed because the authorization ID does not have the 
+required authorization or privilege to perform the operation.  Authorization 
+ID: "VUSER".  Operation: "DELETE". Object: "DB2INST1.STAFF".  SQLSTATE=42501
+
+```
+
+On the server side.<br>
+> ./load.sh<br>
+> ./audit.sh<br>
+
+> cat /tmp/alert.txt<br>
+```
+ALERT: Not authorized command on database sample detected
+
+2021-01-18 21:44:52 SAMPLE  VUSER db1.sb.com 192.168.0.242.60918.210118204146 db2bp db2inst1                                                                              
+```

@@ -161,7 +161,11 @@ The *audit.sh* script is performing the following steps:<br>
 ## MAXTIMESTAMPFILE
 
 The *dbaudit* databases is storing all audit records. To avoid alert duplication, the tool is maintaining *MAXTIMESTAMPFILE* (specified in *config/env.rc*). It is the text file and every line consists the name of the audit table and the timestamp of the last scan. Example:
+
 ```
+AUDIT 2021-01-05-16.11.03.707483
+SECMAINT 2020-12-31-11.11.28.486892
+VALIDATE 2021-01-18-17.21.42.916749
 ```
 CHECKING_MAXTM
 

@@ -326,7 +326,7 @@ On the server side.<br>
 > cat /tmp/alert.txt
 ```
 ALERT: Unauthorized update on sample detected
-2021-01-18 22:56:21 SAMPLE USER db1.sb.com 192.168.0.242.34176.210118215136 db2bp db2inst1 STATEMENT WRITE_DML                 
+2021-01-18 22:56:21 SAMPLE VUSER db1.sb.com 192.168.0.242.34176.210118215136 db2bp db2inst1 STATEMENT WRITE_DML                 
 ```
 
 Unauthorized update statement by user *vuser* is signalled, the same statement by *user* is not.

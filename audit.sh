@@ -1,9 +1,7 @@
-source $(dirname $0)/common.sh
-TMPFILE=`mktemp`
+#!/bin/bash
 
-numberoflines() {
-  wc --line $1 | cut -d ' ' -f 1
-}
+source $(dirname $0)/common.sh
+source $(dirname $0)/calctimestamp.sh
 
 audit() {
     local -r DATABASE=$1
@@ -17,7 +15,7 @@ audit() {
 
     [ -n "$QUERIES" ] || logfatal "QUERIES variable not set in ${db_rc}"
     rundb2 "connect to $AUDITDATABASE"
-    for q in "$QUERIES"; do 
+    for q in $QUERIES; do 
         local q_rc=$(dirname $0)/config/queries/${q}.rc
         log "Reading $q_rc"
 
@@ -45,6 +43,19 @@ audit() {
     rundb2 terminate
 }
 
-audit sample
 
+runaudit() {
+    setmaxvariables
+    audit $1
+}
+
+run() {
+   for DB in $DATABASES; do 
+      runaudit $DB
+   done
+   calcall
+}   
+
+TMPFILE=`mktemp`
+run
 rm $TMPFILE

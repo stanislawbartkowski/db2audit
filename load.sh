@@ -2,17 +2,14 @@
 
 source $(dirname $0)/common.sh
 
-DB=sample
 TMPFILE=`mktemp`
-REPLACE=insert
-
 REPLACE=insert
 
 touch $ALREADYFILE
 
 loadfiles() {
 
-   rundb2 "connect to $AUDITDATABASE"
+   conntoaudit
 
    cat <<EOF | db2 -vs >$TMPFILE
       import from $DELIMDIR/audit.del of del $REPLACE into audit
@@ -28,7 +25,7 @@ EOF
    logfile $TMPFILE
    # ignores warning here
    [ $RES -eq 0 ] || log "$RES - non zero exit code, ignored if warning only"
-   [ $RES -le 4 ] || logfatal "Cannot load audit data into $AUDITDATABASE"
+   [ $RES -lt 4 ] || logfatal "Cannot load audit data into $AUDITDATABASE"
    rundb2 terminate
 }
 
@@ -65,7 +62,18 @@ archiveaudit() {
    rundb2 terminate
 }
 
-archiveaudit $DB
+allarchiveaudit() {
+   for DB in $DATABASES; do 
+      archiveaudit $DB
+   done
+}
 
+test() {
+  loadfiles
+  archiveaudit $DB
+}
+
+
+TMPFILE=`mktemp`
+allarchiveaudit
 rm $TMPFILE
-#loadfiles

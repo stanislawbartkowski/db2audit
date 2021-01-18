@@ -1,3 +1,5 @@
 env.rc
 alert.sh
 config/
+ll
+crontab

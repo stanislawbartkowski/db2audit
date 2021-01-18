@@ -200,6 +200,12 @@ QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE
 
 The query detects all *-551* incidents meaning that the user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
 
+# Error handling, logging
+
+In case of any error coming from *db2* command line or any scripts, the tool is exiting returning 4 exit code and no action is performed. The error should be fixed immediately because it means that security guard is disarmed.<br>
+
+All activities including full SQL statements executed, are logged in $LOGFILE file defined in *config/env.rc* file.<br>
+
 # Test
 
 ## Security
@@ -208,5 +214,21 @@ Assume database *SAMPLE* and the following security policy:<br>
 * *user* : can read and write tables
 * *vuser* : read only user
 * *nuser* : any access forbidden
+
+*config/db_sample.rc* file
+```
+QUERIES="unauthconnect unauthop"
+
+AUTHCONNECTUSERS=",'USER','VUSER'"
+```
+Security audit for *sample* database will run *config/quueries/unauthconnect.rc* and *config/quueries/unauthop.rc*
+
+*AUTHCONNECTUSER* variable is used in *config/quueries/unauthconnect.rc* WHERE clause. Format is very important, after evaluating the variable, proper SQL syntax is expected. Pay attention to comma at the beginning and capital letters in the user names.<br>
+
+```
+AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
+```
+
+
 
 ## Test1, nuser is trying to connect to sample

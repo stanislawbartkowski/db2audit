@@ -161,7 +161,11 @@ The *audit.sh* script is performing the following steps:<br>
 ## MAXTIMESTAMPFILE
 
 The *dbaudit* databases is storing all audit records. To avoid alert duplication, the tool is maintaining *MAXTIMESTAMPFILE* (specified in *config/env.rc*). It is the text file and every line consists the name of the audit table and the timestamp of the last scan. Example:
+
 ```
+AUDIT 2021-01-05-16.11.03.707483
+SECMAINT 2020-12-31-11.11.28.486892
+VALIDATE 2021-01-18-17.21.42.916749
 ```
 CHECKING_MAXTM
 
@@ -191,8 +195,138 @@ Example:
 ```
 HEADER="Not authorized command on database $DATABASE detected"
 
-QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE,AUTHID,HOSTNAME,APPID,APPNAME, INSTNAME FROM CHECKING WHERE STATUS=-551 AND TIMESTAMP>'$CHEKING_MAXTM'"
+QUERY="SELECT VARCHAR_FORMAT(TIMESTAMP,'YYYY-MM-DD HH24:MI:SS') AS TIME,DATABASE,AUTHID,HOSTNAME,APPID,APPNAME, INSTNAME FROM CHECKING WHERE STATUS=-551 AND TIMESTAMP>'$CHECKING_MAXTM'"
 ```
 
 The query detects all *-551* incidents meaning that the user does not have privileges to perform the operation. The *CHECKING_MAXTM* is environment variable set automatically by the tool and allow to limit the audit time range to the latest incidents only.
 
+# Error handling, logging
+
+In case of any error coming from *db2* command line or any scripts, the tool is exiting returning 4 exit code and no action is performed. The error should be fixed immediately because it means that security guard is disarmed.<br>
+
+All activities including full SQL statements executed, are logged in $LOGFILE file defined in *config/env.rc* file.<br>
+
+# Test
+
+## Security
+
+Assume database *SAMPLE* and the following security policy:<br>
+* *user* : can read and write tables
+* *vuser* : read only user
+* *nuser* : any access forbidden
+
+*config/db_sample.rc* file
+```
+QUERIES="unauthconnect unauthop unauthupdate"
+
+AUTHCONNECTUSERS=",'USER','VUSER'"
+UNAUTHUPDATE=",'VUSER'"
+```
+Security audit for *sample* database will run *config/quueries/unauthconnect.rc* and *config/quueries/unauthop.rc*
+
+*AUTHCONNECTUSER* variable is used in *config/queries/unauthconnect.rc* WHERE clause. Format is very important, after evaluating the variable, proper SQL syntax is expected. Pay attention to comma at the beginning and capital letters in the user names.<br>
+
+```
+AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
+```
+In a similar way, *UNAUTHUPDATE* is used in *config/queries/unauthupdate.rc* WHERE clause. This query detects any update sql statement: UPDATE, INSERT, DELETE executed by unautorized users.<br>
+```
+QUERY="SELECT ... FROM EXECUTE WHERE .. AND AUTHID IN ('DB2INST1'${UNAUTHUPDATE}) AND ACTIVITYTYPE='WRITE_DML' ... "
+```
+
+> db2 connect to sample<br>
+
+Make *user* read/wite user.<br>
+> db2 grant DATAACCESS on database to user user<br>
+
+Make *vuser* read only user.<br>
+> db2 grant EXECUTE on package NULLID.SQLC2P30 to user vuser<br>
+> db2 -x list tables | cut -d ' ' -f 1 | while read t; do echo "GRANT SELECT ON $t to user vuser; "; done | db2 -tv<br>
+
+## Test1, nuser is trying to connect to sample
+
+Log in as *user* (authorized) and *nuser* (not authorized).
+
+> db2 connect to sample user user using secret<br>
+> db2 connect to sample user user using secret<br>
+
+On the server side.<br>
+
+> ./load.sh<br>
+> ./audit.sh<br>
+
+> cat /tmp/alert.txt<br>
+```
+LERT: Unauthorized connect to database sample detected
+2021-01-18 18:31:45                                                                                                                                               SAMPLE   NUSER  db1.sb.com 192.168.0.242.57628.210118173145 db2bp  db2inst1                   
+```
+
+Only *nuser* is reported and security incident.
+
+# Test2, vuser tries to update data
+
+> db2 connect to sample user vuser
+> db2 "select * from db2inst1.staff"
+```
+.........
+ 310 Graham        66 Sales     13  71000,00    200,30
+   320 Gonzales      66 Sales      4  76858,20    844,00
+   330 Burke         66 Clerk      1  49988,00     55,50
+   340 Edwards       84 Sales      7  67844,00   1285,00
+   350 Gafney        84 Clerk      5  43030,50    188,00
+
+  35 record(s) selected.
+```
+
+> db2 "delete from db2inst1.staff where DEPT=999"
+```
+DB21034E  The command was processed as an SQL statement because it was not a 
+valid Command Line Processor command.  During SQL processing it returned:
+SQL0551N  The statement failed because the authorization ID does not have the 
+required authorization or privilege to perform the operation.  Authorization 
+ID: "VUSER".  Operation: "DELETE". Object: "DB2INST1.STAFF".  SQLSTATE=42501
+
+```
+
+On the server side.<br>
+> ./load.sh<br>
+> ./audit.sh<br>
+
+> cat /tmp/alert.txt<br>
+```
+ALERT: Not authorized command on database sample detected
+
+2021-01-18 21:44:52 SAMPLE  VUSER db1.sb.com 192.168.0.242.60918.210118204146 db2bp db2inst1                                                                              
+```
+# Test3, overprivileged vuser updates data
+
+Assume that because of the inside job, *vuser* is granted also *DATAACESS* authority.
+
+> db2 grant DATAACCESS on database to user vuser<br>
+
+> db2 connect to sample user vuser<br>
+> db2 "delete from db2inst1.staff where DEPT=999"
+```
+SQL0100W  No row was found for FETCH, UPDATE or DELETE; or the result of a 
+query is an empty table.  SQLSTATE=02000
+```
+
+The same for correctly authorized *user*.
+
+> db2 connect to sample user user<br>
+> db2 "delete from db2inst1.staff where DEPT=999"
+```
+SQL0100W  No row was found for FETCH, UPDATE or DELETE; or the result of a 
+query is an empty table.  SQLSTATE=02000
+```
+
+On the server side.<br>
+>./load.sh<br>
+>./audit.sh<br>
+> cat /tmp/alert.txt
+```
+ALERT: Unauthorized update on sample detected
+2021-01-18 22:56:21 SAMPLE VUSER db1.sb.com 192.168.0.242.34176.210118215136 db2bp db2inst1 STATEMENT WRITE_DML                 
+```
+
+Unauthorized update statement by user *vuser* is signalled, the same statement by *user* is not.

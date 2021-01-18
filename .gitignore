@@ -1,5 +1,5 @@
-env.rc
-alert.sh
+/env.rc
+/alert.sh
 config/
 ll
-crontab
+/crontab

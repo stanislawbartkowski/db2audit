@@ -2,4 +2,4 @@ QUERIES="unauthconnect unauthop unauthupdate"
 
 AUTHCONNECTUSERS=",'USER','VUSER'"
 
-UNAUTHUPDATE=",'VUSER'"
+UNAUTHUPDATE="'VUSER'"

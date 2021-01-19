@@ -1,2 +1,2 @@
-0 0,4,6,8,10,12,14,16,18,20,22 * * * /home/audituser/db2audit/load.sh
-0 1,3,5,7,9,11,13,15,17,19,21,23 * * * /home/audituser/db2audit/audit.sh
+0 0,4,6,8,10,12,14,16,18,20,22 * * * source /home/db2inst1/sqllib/db2profile ; /home/audituser/db2audit/load.sh
+0 1,3,5,7,9,11,13,15,17,19,21,23 * * * source /home/db2inst1/sqllib/db2profile; /home/audituser/db2audit/audit.sh

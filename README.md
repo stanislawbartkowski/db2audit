@@ -220,18 +220,18 @@ Assume database *SAMPLE* and the following security policy:<br>
 QUERIES="unauthconnect unauthop unauthupdate"
 
 AUTHCONNECTUSERS=",'USER','VUSER'"
-UNAUTHUPDATE=",'VUSER'"
+UNAUTHUPDATE="'VUSER'"
 ```
 Security audit for *sample* database will run *config/quueries/unauthconnect.rc* and *config/quueries/unauthop.rc*
 
 *AUTHCONNECTUSER* variable is used in *config/queries/unauthconnect.rc* WHERE clause. Format is very important, after evaluating the variable, proper SQL syntax is expected. Pay attention to comma at the beginning and capital letters in the user names.<br>
 
 ```
-AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS})
+QUERY = SELEC ... FROM CHECKING WHERE ...  EVENT='CONNECT' AND AUTHID NOT IN ('DB2INST1',UPPER('$AUDITUSER')${AUTHCONNECTUSERS}) ...
 ```
-In a similar way, *UNAUTHUPDATE* is used in *config/queries/unauthupdate.rc* WHERE clause. This query detects any update sql statement: UPDATE, INSERT, DELETE executed by unautorized users.<br>
+In a similar way, *UNAUTHUPDATE* is used in *config/queries/unauthupdate.rc* WHERE clause. This query detects any update sql statement: UPDATE, INSERT, DELETE executed by unautorized users. Pay attention that *audituser* is not included in privileded group and will be reported trying to do something outside pute audit related work.<br>
 ```
-QUERY="SELECT ... FROM EXECUTE WHERE .. AND AUTHID IN ('DB2INST1'${UNAUTHUPDATE}) AND ACTIVITYTYPE='WRITE_DML' ... "
+QUERY="SELECT ... FROM EXECUTE WHERE .. AND AUTHID NOT IN ('DB2INST1') AND AUTHID IN (${UNAUTHUPDATE}) AND ACTIVITYTYPE='WRITE_DML'  ... "
 ```
 
 > db2 connect to sample<br>
@@ -247,7 +247,6 @@ Make *vuser* read only user.<br>
 
 Log in as *user* (authorized) and *nuser* (not authorized).
 
-> db2 connect to sample user user using secret<br>
 > db2 connect to sample user user using secret<br>
 
 On the server side.<br>

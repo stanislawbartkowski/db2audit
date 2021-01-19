@@ -147,9 +147,11 @@ https://github.com/stanislawbartkowski/db2audit/blob/main/audit.sh
 
 >./audit.sh<br>
 
-The script can be launched manually on-demand or be executed as a crobjob tab.<br>
+The script can be launched manually on-demand or be executed as a cronjob tab.<br>
 <br>
-The *audit.sh* script is performing the following steps:<br>
+The *
+
+* script is performing the following steps:<br>
 
 * Read all databases in *DATABASES* environment variable.
 * For every database, source *config/db_{database}.rc* file
@@ -188,7 +190,7 @@ unauthop.rc
 ```
 
 Every query is stored as a separate *rc* bash file. The file defines two environment variables:
-* HEADER : The header text included in the alert message making the report more human-readable.
+* HEADER : The header text included in the alert message making the incident report more human-readable.
 * QUERY: The text of the query. It is bash environment variable and can be customized by another environment variable specific to the database.
 
 Example:

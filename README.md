@@ -11,9 +11,18 @@ DB2 auditing by itself is a tool to collect audit data only. Next step is to dev
 * Flexible security rules, easy to define and expand according to a particular use case.
 * More then one database in a single instance, a different set of rules for every database.
 
-# Installation
+The solution can be deployed in two different configuration. 
+
+* Every instance keeps its own copy of audit database. 
+* There is one collective audit database for a group of instances.
+
+## DB2 audit user
+
+Create a separate DB2 user. This user will have *SECADM* authority on monitored database and will run all audit related activities.
 
 ## Download
+
+As *db2audit* user.<br>
 
 > git clone https://github.com/stanislawbartkowski/db2audit.git<br>
 > cd db2audit<br>

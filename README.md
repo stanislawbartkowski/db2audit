@@ -31,7 +31,7 @@ As *db2audit* user.<br>
 
 ## Configuration
 
-*config/env.rc*
+* config/env.rc
 
 | Variable name | Description | Sample value
 | ---- | ----- | ----- |
@@ -44,11 +44,11 @@ As *db2audit* user.<br>
 | DATABASES | List of monitored databases separated by space | "sample mdm"
 <br>
 
-*config/queries*<br>
+* config/queries
 
 List of investigative queries. Every query is stored in a separate *rc* file. More detailed description: look below
 
-*config/db_{database}.rc
+* config/db_{database}.rc
 
 Every database included in *DATABASES* variable should have corresponding *config/db_{database}.rc* file. More detailed description: look below.
 
@@ -99,7 +99,7 @@ Create a separate user to manage audit activities, *audituser*. Make *audituser*
 
 Create audit tables in *dbaudit* database.<br>
 > db2 connect to dbaudit user audituser<br>
-> db2 -tvf /home/db2inst1/sqllib/misc/db2audit.ddl<br>\
+> db2 -tvf /home/db2inst1/sqllib/misc/db2audit.ddl<br>
 > db2 list tables<br>
 ```
 Table/View                      Schema          Type  Creation time             

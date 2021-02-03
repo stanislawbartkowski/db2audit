@@ -78,11 +78,12 @@ echo "=============================" >>$ALERTFILE
 
 ## Execution
 
-The tool contains two main script file.<br>
-* *load.sh* Extracts and loads audit recored in *dbaudit* database
+The tool contains two main script files.<br>
+* *load.sh* Extracts and loads audit recored in *dbaudit* database.
 * *audit.sh* Runs investigative queries to detect security incidents
 
-The scripts should be executed on the host where DB2 instance is installed as *audituser*. It is using a local connection to databases.<br>
+The *load.sh* script should be executed on the host where DB2 instance is installed as *audituser*. It is using a local connection to databases.<br>
+The *audit.sh* script is executed on the host where audit database exists.<br>
 
 # Prerequisities
 

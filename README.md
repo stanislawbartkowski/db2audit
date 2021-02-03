@@ -18,7 +18,13 @@ The solution can be deployed in two different configuration.
 
 ## DB2 audit user
 
-Create a separate DB2 user, for instance: *db2audit*. This user will have *SECADM* authority on monitored database and will run all audit related activities.
+Create a separate DB2 user, for instance: *db2audit*. This user will have *SECADM* authority on monitored database and will run all audit related activities.<br>
+Source DB2 related environment variables:<br>
+
+> vi .bashrc
+```
+source /home/db2inst1/sqllib/db2profile
+```
 
 ## Download
 

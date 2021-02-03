@@ -42,8 +42,10 @@ As *db2audit* user.<br>
 | ALREADYFILE | Text file containing the list of already loaded audit file | $LOGDIR/alreadyfile.txt
 | MAXTIMESTAMPFILE | Text file containing the last timestamp for every audit table | $LOGDIR/maxtimestampfile.txt
 | DATABASES | List of monitored databases separated by space | "sample mdm"
+<br>
 
-*config/queries*
+*config/queries*<br>
+
 List of investigative queries. Every query is stored in a separate *rc* file. More detailed description: look below
 
 *config/db_{database}.rc

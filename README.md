@@ -35,7 +35,7 @@ As *db2audit* user.<br>
 
 | Variable name | Description | Sample value
 | ---- | ----- | ----- |
-| AUDITDATABASE | The name of the audit database | db2uadit
+| AUDITDATABASE | The name of the audit database | db2audit
 | AUDITUSER | The audit user having *SECADM* authority in the database being monitored | 
 | LOGFILE | The log file created by the tool | $LOGDIR/histfile.log
 | DELIMDIR | Temporary directory used to extract CVS text files | DELIMDIR=/tmp/dir

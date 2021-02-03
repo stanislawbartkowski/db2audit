@@ -4,7 +4,7 @@ https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.
 
 Practical step on how to enable DB2 auditing: https://github.com/stanislawbartkowski/wikis/wiki/DB2-auditing<br>
 
-DB2 auditing by itself is a tool to collect audit data only. Next step is to develop a solution to analyze audit data, detect and escalate suspicious behaviour. Several topics under consideration.<br>
+DB2 auditing by itself is a DB2 feature to collect audit data only. Next step is to develop a solution to analyze audit data, detect and escalate suspicious behaviour. Several topics under consideration.<br>
 
 * Collect audit data and make them ready for further analysis.
 * Configurable method to signal security violations.
@@ -18,7 +18,7 @@ The solution can be deployed in two different configuration.
 
 ## DB2 audit user
 
-Create a separate DB2 user. This user will have *SECADM* authority on monitored database and will run all audit related activities.
+Create a separate DB2 user, for instance: *db2audit*. This user will have *SECADM* authority on monitored database and will run all audit related activities.
 
 ## Download
 

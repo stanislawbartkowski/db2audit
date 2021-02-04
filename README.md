@@ -4,7 +4,7 @@ https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.
 
 Practical step on how to enable DB2 auditing: https://github.com/stanislawbartkowski/wikis/wiki/DB2-auditing<br>
 
-DB2 auditing by itself is a tool to collect audit data only. Next step is to develop a solution to analyze audit data, detect and escalate suspicious behaviour. Several topics under consideration.<br>
+DB2 auditing by itself is a DB2 feature to collect audit data only. Next step is to develop a solution to analyze audit data, detect and escalate suspicious behaviour. Several topics under consideration.<br>
 
 * Collect audit data and make them ready for further analysis.
 * Configurable method to signal security violations.
@@ -18,7 +18,13 @@ The solution can be deployed in two different configuration.
 
 ## DB2 audit user
 
-Create a separate DB2 user. This user will have *SECADM* authority on monitored database and will run all audit related activities.
+Create a separate DB2 user, for instance: *db2audit*. This user will have *SECADM* authority on monitored database(s) and will run all audit related activities.<br>
+Source DB2 related environment variables:<br>
+
+> vi .bashrc
+```
+source /home/db2inst1/sqllib/db2profile
+```
 
 ## Download
 
@@ -31,22 +37,24 @@ As *db2audit* user.<br>
 
 ## Configuration
 
-*config/env.rc*
+* config/env.rc
 
 | Variable name | Description | Sample value
 | ---- | ----- | ----- |
-| AUDITDATABASE | The name of the audit database | db2uadit
-| AUDITUSER | The audit user having *SECADM* authority in the database being monitored | 
+| AUDITDATABASE | The name of the audit database | dbaudit
+| AUDITUSER | The audit user having *SECADM* authority on the database being monitored | db2audit
+| AUDITPASSWORD | The audit user password. Only necessary fo remote connection | secret
 | LOGFILE | The log file created by the tool | $LOGDIR/histfile.log
 | DELIMDIR | Temporary directory used to extract CVS text files | DELIMDIR=/tmp/dir
 | ALREADYFILE | Text file containing the list of already loaded audit file | $LOGDIR/alreadyfile.txt
 | MAXTIMESTAMPFILE | Text file containing the last timestamp for every audit table | $LOGDIR/maxtimestampfile.txt
 | DATABASES | List of monitored databases separated by space | "sample mdm"
+<br>
+* config/queries
 
-*config/queries*
 List of investigative queries. Every query is stored in a separate *rc* file. More detailed description: look below
 
-*config/db_{database}.rc
+* config/db_{database}.rc
 
 Every database included in *DATABASES* variable should have corresponding *config/db_{database}.rc* file. More detailed description: look below.
 
@@ -76,47 +84,70 @@ echo "=============================" >>$ALERTFILE
 
 ## Execution
 
-The tool contains two main script file.<br>
-* *load.sh* Extracts and loads audit recored in *dbaudit* database
+The tool contains two main script files.<br>
+* *load.sh* Extracts and loads audit recored in *dbaudit* database.
 * *audit.sh* Runs investigative queries to detect security incidents
 
-The scripts should be executed on the host where DB2 instance is installed as *audituser*. It is using a local connection to databases.<br>
+The *load.sh* script should be executed on the host where DB2 instance is installed as *audituser*. It is using a local connection to databases.<br>
+The *audit.sh* script is executed on the host where audit database exists.<br>
 
-# Prerequisities
+# Installation
 
-## Create user and database
+## Create audit database
 
-Create a separate database to keep audit data, *dbaudit*.<br>
+As *db2inst1* user, create *db2admin* database and make *db2audit* user the owner of the database.<br>
+
 
 > db2 create database dbaudit<br>
+> connect to dbaudit<br>
+> db2 grant DBADM on database to user db2audit<br>
 
-Create a separate user to manage audit activities, *audituser*. Make *audituser* the administrator of *dbaudit* database and assign *SECADM* authority in the database under surveillance. Authority *SECADM* allows the user to run audit-related activity but does not give access to the data.
+As *db2audit* user.<br>
 
-> db2 grant DBADM on database dbaudit to user audituser<br>
-> db2 grant SECADM on database /database/ to user audituser<br>
-
-Create audit tables in *dbaudit* database.<br>
-> db2 connect to dbaudit user audituser<br>
-> db2 -tvf /home/db2inst1/sqllib/misc/db2audit.ddl<br>\
+> db2 connect to dbaudit<br>
+> db2 -tvf /home/db2inst1/sqllib/misc/db2audit.ddl<br>
 > db2 list tables<br>
 ```
 Table/View                      Schema          Type  Creation time             
 ------------------------------- --------------- ----- --------------------------
-AUDIT                           AUDITUSER       T     2020-12-30-23.03.44.834161
-CHECKING                        AUDITUSER       T     2020-12-30-23.03.45.400757
-CONTEXT                         AUDITUSER       T     2020-12-30-23.03.48.494646
-EXECUTE                         AUDITUSER       T     2020-12-30-23.03.49.061434
-OBJMAINT                        AUDITUSER       T     2020-12-30-23.03.45.969018
-SECMAINT                        AUDITUSER       T     2020-12-30-23.03.46.536462
-SYSADMIN                        AUDITUSER       T     2020-12-30-23.03.47.360971
-VALIDATE                        AUDITUSER       T     2020-12-30-23.03.47.927895
+AUDIT                           DB2AUDIT        T     2021-02-04-12.22.37.037944
+CHECKING                        DB2AUDIT        T     2021-02-04-12.22.39.920526
+CONTEXT                         DB2AUDIT        T     2021-02-04-12.22.55.808650
+EXECUTE                         DB2AUDIT        T     2021-02-04-12.22.58.339842
+OBJMAINT                        DB2AUDIT        T     2021-02-04-12.22.42.229087
+SECMAINT                        DB2AUDIT        T     2021-02-04-12.22.44.554437
+SYSADMIN                        DB2AUDIT        T     2021-02-04-12.22.47.522462
+VALIDATE                        DB2AUDIT        T     2021-02-04-12.22.52.873453
 ```
+<br>
+
+Make sure that tables are created in *db2audit* schema.<br>
+
+##  Grant SECADM privilege
+As instance owner, *dbinst1*.<br>
+
+For every database under surveillance, grant *SECADM* authority to *db2audit* user. Authority *SECADM* allows *db2admin* user to run audit-related activity but does not give access to the data.
+
+> db2 connect to /database/<br>
+> db2 grant SECADM on database to user db2audit<br>
+
+## Catalog remote connection
+
+Only if DB2 audit database installed on remote host.<br>
+
+> db2 catalog tcpip node dbaudit remote /remote host/ server 50000<br>
+> db2 catalog database dbaudit at node dbaudit<br>
+
+Make sure that *db2audit* user can connect to remote database.<br>
+
+> db2 connect to dbaudit user db2audit using /password/<br>
+
+
 ## Preparing directories to keep DB2 audit data
 
-Example:<br>
+As *db2inst1* user.<br>
 
-> mkdir audit
-> mkdir archaudit
+> mkdir audit archaudit<br>
 > db2audit configure datapath /home/db2inst1/audit archivepath /home/db2inst1/archaudit
 
 Current audit data records are stored in */home/db2inst1/audit*. After running *AUDIT_ARCHIVE* stored procedure, the audit records are moved to */home/db2inst1/archaudit* directory and */home/db2inst1/audit* is reset.
@@ -127,11 +158,25 @@ Next step is to enable auditing in DB2 database and decide which audit events ar
 
 Assume all data is collected.<br>
 
-> db2 connect to /database/ user audituser<br>
+As *db2audit* user, for every database monitored.<br>
+
+> db2 connect to /database/<br>
 > db2 "CREATE AUDIT POLICY ALL_AUDIT CATEGORIES ALL STATUS BOTH ERROR TYPE NORMAL"<br>
 > db2 "AUDIT database USING POLICY ALL_AUDIT"<br>
 
+Restart DB2.<br>
+
+> db2stop && db2start<br>
+
+Verify that *audit* directory is not empty.<br>
+> ll audit
+```
+-rw-------. 1 db2inst1 db2inst1 640042 02-04 01:16 db2audit.db.SAMPLE.log.0
+```
+
 # Loading audit data
+
+As *db2audit* user.<br>
 
 https://github.com/stanislawbartkowski/db2audit/blob/main/load.sh
 

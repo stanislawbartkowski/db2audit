@@ -95,27 +95,33 @@ The *audit.sh* script is executed on the host where audit database exists.<br>
 
 ## Create audit database
 
-As *db2audit* user.<br>
+As *db2inst1* user, create *db2admin* database and make *db2audit* user the owner of the database.<br>
+
 
 > db2 create database dbaudit<br>
+> connect to dbaudit<br>
+> db2 grant DBADM on database to user db2audit<br>
+
+As *db2audit* user.<br>
+
 > db2 connect to dbaudit<br>
 > db2 -tvf /home/db2inst1/sqllib/misc/db2audit.ddl<br>
 > db2 list tables<br>
 ```
 Table/View                      Schema          Type  Creation time             
 ------------------------------- --------------- ----- --------------------------
-AUDIT                           AUDITUSER       T     2020-12-30-23.03.44.834161
-CHECKING                        AUDITUSER       T     2020-12-30-23.03.45.400757
-CONTEXT                         AUDITUSER       T     2020-12-30-23.03.48.494646
-EXECUTE                         AUDITUSER       T     2020-12-30-23.03.49.061434
-OBJMAINT                        AUDITUSER       T     2020-12-30-23.03.45.969018
-SECMAINT                        AUDITUSER       T     2020-12-30-23.03.46.536462
-SYSADMIN                        AUDITUSER       T     2020-12-30-23.03.47.360971
-VALIDATE                        AUDITUSER       T     2020-12-30-23.03.47.927895
+AUDIT                           DB2AUDIT        T     2021-02-04-12.22.37.037944
+CHECKING                        DB2AUDIT        T     2021-02-04-12.22.39.920526
+CONTEXT                         DB2AUDIT        T     2021-02-04-12.22.55.808650
+EXECUTE                         DB2AUDIT        T     2021-02-04-12.22.58.339842
+OBJMAINT                        DB2AUDIT        T     2021-02-04-12.22.42.229087
+SECMAINT                        DB2AUDIT        T     2021-02-04-12.22.44.554437
+SYSADMIN                        DB2AUDIT        T     2021-02-04-12.22.47.522462
+VALIDATE                        DB2AUDIT        T     2021-02-04-12.22.52.873453
 ```
 <br>
 
-Make sure that tables are created in *db2audit* schema (here audituser).<br>
+Make sure that tables are created in *db2audit* schema.<br>
 
 ##  Grant SECADM privilege
 As instance owner, *dbinst1*.<br>

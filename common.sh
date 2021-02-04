@@ -29,10 +29,24 @@ logfatal() {
    exit 4
 }
 
+#=== FUNCTION ======================================================================================
+#        NAME: rundb2
+# DESCRIPTION: Common function to run any db2 command. Every command executed is logged
+# PARAMETER 1: Command to execute
+# PARAMETER 2: (optional) additional parameter to db2
+# PARAMETER 3: (optional) password, if set, do not log command
+#     RETURNS: If db2 exit command greater or equal 4 meaning fatal error, exits the application
+#              If db2 exit command not zero but less then 4, logs warning and continues
+#              Non-fatal exit code could mean, for instance, empty result set
+#===================================================================================================
+
+
 rundb2() {
    local -r command="$1"
    local -r X=$2
-   log "$command"
+   local -r PASSWORD=$3
+
+   [ -z "$PASSWORD" ] && log "$command"
    eval db2 $X "\"$command\"" >$TMPFILE
    local -r RES=$?
    logfile $TMPFILE 
@@ -40,8 +54,20 @@ rundb2() {
    [ $RES -lt 4 ] || logfatal "Execution failed. db2 exit code $RES"
 }
 
+#=== FUNCTION ======================================================================================
+#        NAME: conntoaudit
+# DESCRIPTION: Connects to audit database. Supports local or remote connection
+# PARAMETERS : no parameters
+#     RETURNS: If not successfull, exits the application
+#===================================================================================================
+
+
 conntoaudit() {
-   rundb2 "connect to $AUDITDATABASE"
+   local CREDENTIALS=""
+   local PASSWORDPARAMETER=""
+   [ -n "$AUDITPASSWORD" ] && CREDENTIALS=" USER $AUDITUSER USING $AUDITPASSWORD"
+   [ -n "$AUDITPASSWORD" ] && PASSWORDPARAMETER="-x -x"
+   rundb2 "connect to $AUDITDATABASE $CREDENTIALS" $PASSWORDPARAMETER
 }
 
 numberoflines() {

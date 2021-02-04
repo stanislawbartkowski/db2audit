@@ -266,6 +266,28 @@ In case of any error coming from *db2* command line or any scripts, the tool is 
 
 All activities including full SQL statements executed, are logged in $LOGFILE file defined in *config/env.rc* file.<br>
 
+# Single DB2 audit database 
+
+## Installation
+
+In this variant, there is a single remote audit database for a group of DB2 instances. DB2 instances are only collecting audit data and loading into remote audit database. The investigative queries and violations reporting are performed on DB2 audit instance.<br>
+<br>
+## DB2 audit node
+
+ * Audit database is installed only on this node. 
+ * Only *audit.sh* job is running on this mode, *load.sh* is not activated.
+ 
+ ## DB2 instance
+ 
+* Configure remote connection to audit database.<br>
+
+> db2 catalog tcpip node dbaudit remote /remote host/ server 50000<br>
+> db2 catalog database dbaudit at node dbaudit<br>
+
+* *AUDITPASSWORD* variable is set in *config/env.rc* configuration file.
+
+* Only *load.sh* job is runnning, *audit.sh* is not activated.
+
 # Test
 
 ## Security

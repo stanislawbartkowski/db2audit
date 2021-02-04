@@ -42,7 +42,8 @@ As *db2audit* user.<br>
 | Variable name | Description | Sample value
 | ---- | ----- | ----- |
 | AUDITDATABASE | The name of the audit database | dbaudit
-| AUDITUSER | The audit user having *SECADM* authority in the database being monitored | db2audit
+| AUDITUSER | The audit user having *SECADM* authority on the database being monitored | db2audit
+| AUDITPASSWORD | The audit user password. Only necessary fo remote connection | secret
 | LOGFILE | The log file created by the tool | $LOGDIR/histfile.log
 | DELIMDIR | Temporary directory used to extract CVS text files | DELIMDIR=/tmp/dir
 | ALREADYFILE | Text file containing the list of already loaded audit file | $LOGDIR/alreadyfile.txt

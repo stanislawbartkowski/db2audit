@@ -114,6 +114,9 @@ SYSADMIN                        AUDITUSER       T     2020-12-30-23.03.47.360971
 VALIDATE                        AUDITUSER       T     2020-12-30-23.03.47.927895
 ```
 <br>
+
+Make sure that tables are created in *db2audit* schema (here audituser).<br>
+
 ##  Grant SECADM privilege
 As instance owner, *dbinst1*.<br>
 

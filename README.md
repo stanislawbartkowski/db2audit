@@ -164,7 +164,11 @@ As *db2audit* user, for every database monitored.<br>
 > db2 "CREATE AUDIT POLICY ALL_AUDIT CATEGORIES ALL STATUS BOTH ERROR TYPE NORMAL"<br>
 > db2 "AUDIT database USING POLICY ALL_AUDIT"<br>
 
-Restart DB2.<br>
+Deactive and activate database or restart DB2 instance.<br>
+
+> db2 deactivate database /database name/<br>
+> db2 activate database /database name/<br>
+
 
 > db2stop && db2start<br>
 

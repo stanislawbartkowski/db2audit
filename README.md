@@ -50,7 +50,6 @@ As *db2audit* user.<br>
 | MAXTIMESTAMPFILE | Text file containing the last timestamp for every audit table | $LOGDIR/maxtimestampfile.txt
 | DATABASES | List of monitored databases separated by space | "sample mdm"
 <br>
-
 * config/queries
 
 List of investigative queries. Every query is stored in a separate *rc* file. More detailed description: look below
@@ -115,7 +114,6 @@ SYSADMIN                        AUDITUSER       T     2020-12-30-23.03.47.360971
 VALIDATE                        AUDITUSER       T     2020-12-30-23.03.47.927895
 ```
 <br>
-
 ##  Grant SECADM privilege
 As instance owner, *dbinst1*.<br>
 
@@ -123,6 +121,18 @@ For every database under surveillance, grant *SECADM* authority to *db2audit* us
 
 > db2 connect to /database/<br>
 > db2 grant SECADM on database to user db2audit<br>
+
+## Catalog remote connection
+
+Only if DB2 audit database installed on remote host.<br>
+
+> db2 catalog tcpip node dbaudit remote /remote host/ server 50000<br>
+> db2 catalog database dbaudit at node dbaudit<br>
+
+Make sure that *db2audit* user can connect to remote database.<br>
+
+> db2 connect to dbaudit user db2audit using /password/<br>
+
 
 ## Preparing directories to keep DB2 audit data
 
